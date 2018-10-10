@@ -12,8 +12,8 @@ import OAuthSwift
 import OAuthSwiftAlamofire
 import KeychainAccess
 
+
 class APIManager: SessionManager {
-    
     static let consumerKey = ProcessInfo.processInfo.environment["API_KEY"]!
     static let consumerSecret = ProcessInfo.processInfo.environment["API_SECRET_KEY"]!
 
@@ -40,7 +40,6 @@ class APIManager: SessionManager {
                     print("Welcome \(user.name ?? "!")")
                     
                     User.current = user
-                    // MARK: TODO: set User.current, so that it's persisted
                     
                     success()
                 }
@@ -50,11 +49,11 @@ class APIManager: SessionManager {
         }
     }
     
-    static func logout() {
+    func logout() {
         // 1. Clear current user
         User.current = nil
-        
-        // TODO: 2. Deauthorize OAuth tokens
+
+        self.clearCredentials()
         
         // 3. Post logout notification
         NotificationCenter.default.post(name: NSNotification.Name("didLogout"), object: nil)
@@ -81,46 +80,35 @@ class APIManager: SessionManager {
         
     func getHomeTimeLine(completion: @escaping ([Tweet]?, Error?) -> ()) {
 
-        // This uses tweets from disk to avoid hitting rate limit. Comment out if you want fresh
-        // tweets,
-        if let data = UserDefaults.standard.object(forKey: "hometimeline_tweets") as? Data {
-            let tweetDictionaries = NSKeyedUnarchiver.unarchiveObject(with: data) as! [[String: Any]]
-            let tweets = tweetDictionaries.flatMap({ (dictionary) -> Tweet in
-                Tweet(dictionary: dictionary)
-            })
-
-            completion(tweets, nil)
-            return
-        }
-
-        request(URL(string: "https://api.twitter.com/1.1/statuses/home_timeline.json")!, method: .get)
-            .validate()
-            .responseJSON { (response) in
-                switch response.result {
-                case .failure(let error):
-                    completion(nil, error)
-                    return
-                case .success:
-                    guard let tweetDictionaries = response.result.value as? [[String: Any]] else {
-                        print("Failed to parse tweets")
-                        let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Failed to parse tweets"])
-                        completion(nil, error)
-                        return
-                    }
-
-                    let data = NSKeyedArchiver.archivedData(withRootObject: tweetDictionaries)
-                    UserDefaults.standard.set(data, forKey: "hometimeline_tweets")
-                    UserDefaults.standard.synchronize()
-
-                    let tweets = tweetDictionaries.flatMap({ (dictionary) -> Tweet in
-                        Tweet(dictionary: dictionary)
-                    })
-                    completion(tweets, nil)
-                }
+        // 1. Create a GET Request that returns a JSON response
+        request(URL(string: "https://api.twitter.com/1.1/statuses/home_timeline.json")!, method: .get).validate().responseJSON { (response) in
+            // 2. Verify succes
+            if response.result.isSuccess,
+                let tweetDictionaries = response.result.value as? [[String: Any]] {
+                print(tweetDictionaries)
+                // Success
+                let tweets = Tweet.tweets(with: tweetDictionaries)
+                completion(tweets, nil)
+            } else {
+                // There was a problem
+                completion(nil, response.result.error)
+            }
         }
     }
     
-    // MARK: TODO: Favorite a Tweet
+    func favorite(_ tweet: Tweet, completion: @escaping (Tweet?, Error?) -> ()) {
+        let urlString = "https://api.twitter.com/1.1/favorites/create.json"
+        let parameters = ["id": tweet.id]
+        request(urlString, method: .post, parameters: parameters, encoding: URLEncoding.queryString).validate().responseJSON { (response) in
+            if response.result.isSuccess,
+                let tweetDictionary = response.result.value as? [String: Any] {
+                let tweet = Tweet(dictionary: tweetDictionary)
+                completion(tweet, nil)
+            } else {
+                completion(nil, response.result.error)
+            }
+        }
+    }
     
     // MARK: TODO: Un-Favorite a Tweet
     
