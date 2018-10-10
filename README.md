@@ -2,16 +2,16 @@
 
 **Alt Twitter** is a basic twitter app to read and compose tweets the [Twitter API](https://apps.twitter.com/).
 
-Time spent: **X** hours spent in total
+Time spent: **4** hours spent in total
 
 ## User Stories
 
 The following **required** functionality is completed:
 
-- [ ] User sees app icon in home screen and styled launch screen. (1pt)
-- [ ] User can sign in using OAuth login flow. (1pt)
+- [X] User sees app icon in home screen and styled launch screen. (1pt)
+- [X] User can sign in using OAuth login flow. (1pt)
 - [ ] User can Logout. (1pt)
-- [ ] Create Data Models for User and Tweet. (1pt)
+- [X] Create Data Models for User and Tweet. (1pt)
 - [ ] User can view last 20 tweets from their home timeline with the user profile picture, username, tweet text, and timestamp. (2pts)
 - [ ] User can pull to refresh. (1pt)
 - [ ] User can tap the retweet and favorite buttons in a tweet cell to retweet and/or favorite a tweet. (2pts)
@@ -27,11 +27,11 @@ The following **stretch** features are implemented:
 
 The following **additional** features are implemented:
 
-- [ ] List anything else that you can get done to improve the app functionality!
+- [X] I added environment variables so that way I don't have to keep removing them when I push to the repo
 
 Please list two areas of the assignment you'd like to **discuss further with your peers** during the next class (examples include better ways to implement something, how to extend your app in certain ways, etc):
 
-1.
+1. I would like to see how my peers did with this assigment
 2.
 
 ## Video Walkthrough

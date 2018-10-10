@@ -14,7 +14,6 @@ import KeychainAccess
 
 class APIManager: SessionManager {
     
-    // MARK: TODO: Add App Keys
     static let consumerKey = ProcessInfo.processInfo.environment["API_KEY"]!
     static let consumerSecret = ProcessInfo.processInfo.environment["API_SECRET_KEY"]!
 
@@ -38,8 +37,9 @@ class APIManager: SessionManager {
                 if let error = error {
                     failure(error)
                 } else if let user = user {
-                    print("Welcome \(user.name)")
+                    print("Welcome \(user.name ?? "!")")
                     
+                    User.current = user
                     // MARK: TODO: set User.current, so that it's persisted
                     
                     success()
@@ -48,6 +48,16 @@ class APIManager: SessionManager {
         }) { (error) in
             failure(error)
         }
+    }
+    
+    static func logout() {
+        // 1. Clear current user
+        User.current = nil
+        
+        // TODO: 2. Deauthorize OAuth tokens
+        
+        // 3. Post logout notification
+        NotificationCenter.default.post(name: NSNotification.Name("didLogout"), object: nil)
     }
     
 
