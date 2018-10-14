@@ -11,6 +11,7 @@ target 'twitter_alamofire_demo' do
   pod 'OAuthSwiftAlamofire'
   pod 'KeychainAccess'
   pod 'AlamofireImage'
+  pod 'AFNetworking'
 
   target 'twitter_alamofire_demoTests' do
     inherit! :search_paths

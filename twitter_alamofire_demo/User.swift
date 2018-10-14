@@ -12,7 +12,11 @@ class User {
     
     var name: String?
     var screenName: String?
-    var imageURL: URL?
+    var imageURL: String?
+    var backdropURL: String?
+    var followerCount: Int?
+    var tweetCount: Int?
+    var followingCount: Int?
     
     static var _current: User?
     var dictionary: [String: Any]?
@@ -21,7 +25,11 @@ class User {
         self.dictionary = dictionary
         name = dictionary["name"] as? String
         screenName = dictionary["screen_name"] as? String
-        imageURL = dictionary["profile_image_url"] as? URL
+        imageURL = dictionary["profile_image_url_https"] as? String
+        backdropURL = dictionary["profile_banner_url"] as? String
+        followerCount = dictionary["followers_count"] as? Int
+        tweetCount = dictionary["statuses_count"] as? Int
+        followingCount = dictionary["friends_count"] as? Int
     }
     
     static var current: User? {

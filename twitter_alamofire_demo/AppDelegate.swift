@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         APIManager.shared.getCurrentAccount(completion: { (user:User?, error:Error?) in
             if user != nil {
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let homeTimelineViewController = storyboard.instantiateViewController(withIdentifier: "TweetsNavigationController")
+                let homeTimelineViewController = storyboard.instantiateViewController(withIdentifier: "TabBarController")
                 self.window?.rootViewController = homeTimelineViewController
             }
         })

@@ -7,9 +7,10 @@
 //
 
 import UIKit
-//import AlamofireImage
+import AlamofireImage
 
-class TimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class TimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, ComposeViewControllerDelegate, TweetCellDelegate, replyCellDelegate {
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
@@ -20,13 +21,13 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.rowHeight = UITableViewAutomaticDimension
-        self.tableView.estimatedRowHeight = 100
+        self.tableView.estimatedRowHeight = 20
         activityIndicator.startAnimating()
         
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshControlAction(_:)), for: UIControlEvents.valueChanged)
         tableView.insertSubview(refreshControl, at: 0)
-
+        
         getData()
 
     }
@@ -42,7 +43,6 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
             if let tweets = tweets {
                 self.activityIndicator.stopAnimating()
                 self.tableView.isHidden = false
-                self.tableView.rowHeight = 200
                 self.tweets = tweets
                 self.tableView.reloadData()
             } else {
@@ -67,6 +67,8 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetCell
         
+        cell.delegate = self
+        cell.replyDelegate = self
         let tweet = tweets[indexPath.row]
         cell.tweet = tweet
         
@@ -81,13 +83,52 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
-    @IBAction func didTapLogout(_ sender: Any) {
-        APIManager.shared.logout()
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "tweetDetailSegue" {
+            let indexPath = self.tableView.indexPathForSelectedRow
+            let detailViewController = segue.destination as! TweetDetailViewController
+            
+            let tweet = self.tweets[indexPath!.row]
+            detailViewController.tweet = tweet
+        }
+        
+        if segue.identifier == "composeSegue" {
+            let detailViewController = segue.destination as! ComposeViewController
+            
+            detailViewController.user = User.current
+        }
+        
+        if segue.identifier == "replySegue" {
+            if let detailViewController = segue.destination as? ComposeViewController {
+                detailViewController.tweetDelegate = self
+                detailViewController.user = User.current
+                detailViewController.respondingToUser = sender as! User
+            }
+        }
+        
+        if segue.identifier == "tweetProfileSegue" {
+            if let detailViewController = segue.destination as? ProfileViewController {
+                detailViewController.delegate = self
+                detailViewController.tweetUser = sender as! User
+            }
+        }
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
-
+    
+    func did(post: Tweet) {
+        getData()
+    }
+    
+    func tweetCell(_ tweetCell: TweetCell, didTap user: User) {
+        print("Clicked profile")
+        performSegue(withIdentifier: "tweetProfileSegue", sender: user)
+    }
+    
+    func replyTweetCell(_ tweetCell: TweetCell, didTap user: User) {
+        print("IN TIMELINE")
+        performSegue(withIdentifier: "replySegue", sender: user)
+    }
 }

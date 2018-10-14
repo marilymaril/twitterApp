@@ -30,7 +30,7 @@ class Tweet {
         if let originalTweet = dictionary["retweeted_status"] as? [String: Any] {
             let userDictionary = dictionary["user"] as! [String: Any]
             self.retweetedByUser = User(dictionary: userDictionary)
-            
+                        
             // Change tweet to original tweet
             dictionary = originalTweet
         }
@@ -54,7 +54,7 @@ class Tweet {
         let date = formatter.date(from: createdAtOriginalString)!
         // Configure output format
         formatter.dateStyle = .short
-        formatter.timeStyle = .none
+        formatter.timeStyle = .short
         // Convert Date to String and set the createdAtString property
         createdAtString = formatter.string(from: date)
     }
